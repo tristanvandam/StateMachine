@@ -105,9 +105,10 @@ namespace StateMachine.ExampleTestApp.Configuration
             builder.Register((cc) =>
             {
                 var dictionary = new Dictionary<Actions, Func<ILatch>>();
+                var c = cc.Resolve<IComponentContext>();    //nne
                 foreach (var (action, latchToResolveName) in latchActions)
                 {
-                    dictionary.Add(action, () => cc.ResolveKeyed<ILatch>(latchToResolveName));
+                    dictionary.Add(action, () => c.ResolveKeyed<ILatch>(latchToResolveName));
                 }
 
                 var newLatch = new Latch(state, dictionary, name, doNothingOnReEnter);
