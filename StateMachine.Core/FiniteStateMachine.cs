@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Dynamic;
 using System.Threading.Tasks;
 
 namespace StateMachine.Core
@@ -43,6 +42,11 @@ namespace StateMachine.Core
         public void ForceSate(Latch latch)
         {
             _currentLatch = latch;
+        }
+
+        public string GetCurrentState()
+        {
+            return _currentLatch.Name;
         }
     }
 }

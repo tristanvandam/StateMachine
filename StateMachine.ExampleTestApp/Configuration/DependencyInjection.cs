@@ -16,7 +16,8 @@ namespace StateMachine.ExampleTestApp.Configuration
         {
             //Let's start off with the current latch being home
 
-            var internalContainerBuilder = containerBuilder?? new ContainerBuilder();
+            //containerBuilder = containerBuilder?? new ContainerBuilder();
+            containerBuilder ??= new ContainerBuilder();
             var cancellationTokenSource = new CancellationTokenSource();
 
 
@@ -54,7 +55,7 @@ namespace StateMachine.ExampleTestApp.Configuration
             });
 
 
-
+            containerBuilder.RegisterType<ConsoleLogger>().As<ILogger>();
 
             containerBuilder.Register<FiniteStateMachine>(context =>
             {
@@ -70,7 +71,7 @@ namespace StateMachine.ExampleTestApp.Configuration
             }).As<IProgram>();
 
 
-            return internalContainerBuilder.Build();
+            return containerBuilder.Build();
         }
 
     }

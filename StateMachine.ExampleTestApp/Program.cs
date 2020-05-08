@@ -41,7 +41,7 @@ namespace StateMachine.ExampleTestApp
             while (!_cts.IsCancellationRequested)
             {
                 var key = Console.ReadKey();
-
+                ExtendedConsole.BlankLine();
                 switch (key.Key)
                 {
                     case ConsoleKey.W:
@@ -53,6 +53,9 @@ namespace StateMachine.ExampleTestApp
                         break;
                     case ConsoleKey.S:
                         await _finiteStateMachine.TriggerAction(TransportActions.FallAsleep);
+                        break;
+                    case ConsoleKey.L:
+                        _logger.Log(_finiteStateMachine.GetCurrentState());
                         break;
                     case ConsoleKey.Escape:
                     case ConsoleKey.E:

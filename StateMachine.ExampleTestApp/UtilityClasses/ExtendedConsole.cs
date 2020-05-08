@@ -9,9 +9,10 @@ namespace StateMachine.ExampleTestApp.UtilityClasses
         {
             Console.WriteLine("-------------------------------------");
             Console.WriteLine("To exit the application at any time. Press 'E' or `ESC`");
-            Console.WriteLine("To Preform action WakeUp. Press 'W'");
-            Console.WriteLine("To Preform action TakeTrain. Press 'T'");
-            Console.WriteLine("To Preform action FallAsleep. Press 'S'");
+            Console.WriteLine("To Preform action 'WakeUp'. Press 'W'");
+            Console.WriteLine("To Preform action 'TakeTrain'. Press 'T'");
+            Console.WriteLine("To Preform action 'FallAsleep'. Press 'S'");
+            Console.WriteLine("To List current state, press 'L'");
             Console.WriteLine("-------------------------------------");
         }
 

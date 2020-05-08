@@ -6,5 +6,6 @@ namespace StateMachine.Core
     {
         Task TriggerAction(Actions actions);
         void ForceSate(Latch latch);
+        string GetCurrentState();
     }
 }
