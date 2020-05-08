@@ -6,7 +6,7 @@ using StateMachine.Core;
 
 namespace StateMachine.ExampleTestApp
 {
-    class Program : IDisposable
+    internal class Program : IProgram
     {
         private readonly IFiniteStateMachine _finiteStateMachine;
         private readonly CancellationTokenSource _cts;
@@ -18,8 +18,10 @@ namespace StateMachine.ExampleTestApp
 
 
         }
-        static void Main(string[] args)
+
+        internal static void Main(string[] args)
         {
+            //TODO - Configure DI
             //Create Latches.. 
             var workLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Work - location");
             var homeLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Home - location");
@@ -45,7 +47,7 @@ namespace StateMachine.ExampleTestApp
 
             //TODO - Drive State Machine
 
-            var stateMachine = new FiniteStateMachine(homeLatch,Console.WriteLine);
+            var stateMachine = new FiniteStateMachine(homeLatch, Console.WriteLine);
             var cancellationTokenSource = new CancellationTokenSource();
 
             //Run program
@@ -56,28 +58,14 @@ namespace StateMachine.ExampleTestApp
             Console.WriteLine("Hello World!");
         }
 
-        public Task Run()
+        public async Task Run()
         {
             throw new NotImplementedException();
         }
+
         public void Dispose()
         {
             _cts?.Dispose();
         }
-    }
-
-
-    public class TransportActions : Actions
-    {
-        public string OtherMeta { get; }
-
-        private TransportActions(int id, string name, string otherMeta) : base(id, name)
-        {
-            OtherMeta = otherMeta;
-        }
-
-        public static TransportActions TakeTrain = new TransportActions(1, nameof(TakeTrain), "At nearest train station.");
-        public static TransportActions WakeUp = new TransportActions(2, nameof(WakeUp), "Always at 5am");
-        public static TransportActions FallAsleep = new TransportActions(3, nameof(FallAsleep), "In Queen size bed");
     }
 }

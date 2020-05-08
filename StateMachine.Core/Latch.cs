@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace StateMachine.Core
 {
-    public class Latch
+    public class Latch : ILatch
     {
         private readonly IDictionary<Actions, Func<Latch>> _actions;
 
@@ -31,18 +32,31 @@ namespace StateMachine.Core
             return !_actions.TryGetValue(actions, out var latchFactory) ? this : latchFactory.Invoke();
         }
 
-        internal void Exit()
+
+        //TODO - Decide which way you want to implement this
+        public Func<State, object, Task> OnExit { get; set; } = (state, data) => Task.CompletedTask;
+        public OnEnterDelegate OnEnter { get; set; } = (state, data) => Task.CompletedTask;
+        public delegate Task OnEnterDelegate(State currentState, object transportData = null);
+
+
+        internal async Task Exit(object transportData = null)
         {
+            await OnExit(State, transportData);
             //TODO make overridable onExit Method
-
-            throw new NotImplementedException();
         }
 
 
-        internal void Enter()
+        internal async Task Enter(object transportData = null)
         {
-            //TODO make overridable onEnter Method
-            //throw new NotImplementedException();
+            await OnEnter(State, transportData);
+            //TODO do other internal stuff.. 
         }
+
+    }
+
+    public interface ILatch
+    {
+        Func<State, object, Task> OnExit { get; set; }
+        Latch.OnEnterDelegate OnEnter { get; set; }
     }
 }
