@@ -5,6 +5,8 @@ using System.Threading;
 using Autofac;
 using Autofac.Core;
 using StateMachine.Core;
+using StateMachine.Core.StateManagement;
+using StateMachine.Core.StateManagement.States;
 using StateMachine.ExampleTestApp.Logger;
 
 namespace StateMachine.ExampleTestApp.Configuration

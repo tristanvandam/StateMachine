@@ -1,4 +1,5 @@
 ﻿using StateMachine.Core;
+using StateMachine.Core.StateManagement;
 
 namespace StateMachine.ExampleTestApp
 {

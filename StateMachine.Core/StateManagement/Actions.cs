@@ -1,4 +1,4 @@
-﻿namespace StateMachine.Core
+﻿namespace StateMachine.Core.StateManagement
 {
     public abstract class Actions
     {

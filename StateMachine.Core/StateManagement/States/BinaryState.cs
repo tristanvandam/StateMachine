@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StateMachine.Core
+namespace StateMachine.Core.StateManagement.States
 {
     public sealed class BinaryState : State
     {

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using StateMachine.Core.StateManagement.States;
 
-namespace StateMachine.Core
+namespace StateMachine.Core.StateManagement
 {
     public class Latch : ILatch
     {

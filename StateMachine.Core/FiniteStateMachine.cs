@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using StateMachine.Core.StateManagement;
 
 namespace StateMachine.Core
 {
