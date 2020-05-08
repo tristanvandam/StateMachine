@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Dynamic;
+using System.Threading.Tasks;
 
 namespace StateMachine.Core
 {
@@ -13,30 +14,30 @@ namespace StateMachine.Core
 
             _currentLatch = initialStateLatch;
             _internalLog = internalLog ?? delegate(string s) {  };
-
-            // will be implementing this StateMachine: https://miro.medium.com/max/1520/1*z-cGUTYS40cSjcMWgiOLww.png
         }
 
-        public void TriggerAction(Actions actions)
+        public async Task TriggerAction(Actions actions)
         {
             _internalLog($"Current latch ({_currentLatch.Name}) with action: '{actions.Name}'");
             var nextLatch  = _currentLatch.NextLatchFromAction(actions);
-            _internalLog($"Next latch ({_currentLatch.Name}) from action: '{actions.Name}'");
+            _internalLog($"Next latch ({nextLatch.Name}) from action: '{actions.Name}'");
 
-            if (nextLatch.GetType() == _currentLatch.GetType() && _currentLatch.DoNothingOnReEnter)
+            if (ShouldDoNothingForCurrentLatch(nextLatch))
             {
-                //DO Nothing
-                return;
+                //DO NOTHING
+                return ;
             }
 
-            _currentLatch.Exit();
+            await _currentLatch.Exit();
+            _currentLatch = nextLatch;      //swap latches
+            _internalLog($"Current latch has been updated and is now {_currentLatch.Name}");
+            await _currentLatch.Enter();
+        }
 
-            _currentLatch = nextLatch;
-            _currentLatch.Enter();
-
-            _internalLog($"Current latch is now {_currentLatch.Name}");
-            _internalLog($"------------------------------------");
-
+        private bool ShouldDoNothingForCurrentLatch(Latch nextLatch)
+        {
+            // If the latch type doesn't change and the latch is configured to not re-enter itself if unchanged then return true (for do nothing)
+            return nextLatch.GetType() == _currentLatch.GetType() && _currentLatch.DoNothingOnReEnter;
         }
 
         public void ForceSate(Latch latch)

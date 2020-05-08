@@ -1,8 +1,10 @@
-﻿namespace StateMachine.Core
+﻿using System.Threading.Tasks;
+
+namespace StateMachine.Core
 {
     public interface IFiniteStateMachine
     {
-        void TriggerAction(Actions actions);
+        Task TriggerAction(Actions actions);
         void ForceSate(Latch latch);
     }
 }

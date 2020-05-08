@@ -1,71 +1,78 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac;
 using StateMachine.Core;
+using StateMachine.ExampleTestApp.Configuration;
+using StateMachine.ExampleTestApp.Logger;
+using StateMachine.ExampleTestApp.UtilityClasses;
 
 namespace StateMachine.ExampleTestApp
 {
+    //Will be implementing this StateMachine: https://miro.medium.com/max/1520/1*z-cGUTYS40cSjcMWgiOLww.png
+
     internal class Program : IProgram
     {
-        private readonly IFiniteStateMachine _finiteStateMachine;
-        private readonly CancellationTokenSource _cts;
-
-        private Program(IFiniteStateMachine finiteStateMachine, CancellationTokenSource cancellationTokenSource)
-        {
-            _finiteStateMachine = finiteStateMachine;
-            _cts = cancellationTokenSource;
-
-
-        }
-
         internal static void Main(string[] args)
         {
-            //TODO - Configure DI
-            //Create Latches.. 
-            var workLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Work - location");
-            var homeLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Home - location");
-            var bedLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Bed - location");
-
-            //TODO - Setup Action Factory
-            workLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.TakeTrain] = () => homeLatch
-            });
-
-            homeLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.TakeTrain] = () => workLatch,
-                [TransportActions.FallAsleep] = () => bedLatch
-            });
-
-            bedLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.WakeUp] = () => homeLatch
-            });
-            //Let's start off with the current latch being home
-
-            //TODO - Drive State Machine
-
-            var stateMachine = new FiniteStateMachine(homeLatch, Console.WriteLine);
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            //Run program
-            var program = new Program(stateMachine, cancellationTokenSource);
-            var runTask = program.Run();
+            var container = DependencyInjection.ConfigureDependencies();
+            var program = container.Resolve<IProgram>();
+            var runTask = program.Run(args);
             runTask.Wait();
             program.Dispose();
-            Console.WriteLine("Hello World!");
         }
 
-        public async Task Run()
+        internal Program(IFiniteStateMachine finiteStateMachine, ILogger logger, CancellationTokenSource cancellationTokenSource)
         {
-            throw new NotImplementedException();
+            _finiteStateMachine = finiteStateMachine;
+            _logger = logger;
+            _cts = cancellationTokenSource;
+        }
+
+        private readonly IFiniteStateMachine _finiteStateMachine;
+        private readonly ILogger _logger;
+        private readonly CancellationTokenSource _cts;
+
+        public async Task Run(string[] args)
+        {
+            _logger.Log("Starting Application");
+            ExtendedConsole.PrintHelpText();
+
+            while (!_cts.IsCancellationRequested)
+            {
+                var key = Console.ReadKey();
+
+                switch (key.Key)
+                {
+                    case ConsoleKey.W:
+                        //This could be for example on an event or message received from RabbitMQ, etc... 
+                       await _finiteStateMachine.TriggerAction(TransportActions.WakeUp);
+                        break;
+                    case ConsoleKey.T:
+                        await _finiteStateMachine.TriggerAction(TransportActions.TakeTrain);
+                        break;
+                    case ConsoleKey.S:
+                        await _finiteStateMachine.TriggerAction(TransportActions.FallAsleep);
+                        break;
+                    case ConsoleKey.Escape:
+                    case ConsoleKey.E:
+                        _cts.Cancel();
+                        break;
+                    default:
+                        Console.WriteLine($"You Pressed {key.Key}");
+                        ExtendedConsole.PrintHelpText();
+                        ExtendedConsole.BlankLine();
+                        break;
+                }
+            }
+
+            _logger.Log($"Closing Application");
         }
 
         public void Dispose()
         {
             _cts?.Dispose();
+            _logger?.Dispose();
         }
     }
 }

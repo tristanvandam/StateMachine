@@ -5,6 +5,6 @@ namespace StateMachine.ExampleTestApp
 {
     internal interface IProgram : IDisposable
     {
-        Task Run();
+        Task Run(string[] args);
     }
 }

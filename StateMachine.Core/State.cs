@@ -2,7 +2,7 @@
 
 namespace StateMachine.Core
 {
-    public abstract class State
+    public abstract class State : IState
     {
         public Guid StateId { get; }
         public string Name { get; }
@@ -13,5 +13,9 @@ namespace StateMachine.Core
             Name = name;
         }
 
+    }
+
+    public interface IState
+    {
     }
 }

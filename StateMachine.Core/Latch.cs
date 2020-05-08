@@ -33,21 +33,21 @@ namespace StateMachine.Core
         }
 
 
-        //TODO - Decide which way you want to implement this
         public Func<State, object, Task> OnExit { get; set; } = (state, data) => Task.CompletedTask;
-        public OnEnterDelegate OnEnter { get; set; } = (state, data) => Task.CompletedTask;
-        public delegate Task OnEnterDelegate(State currentState, object transportData = null);
+        public Func<State, object, Task> OnEnter { get; set; } = (state, data) => Task.CompletedTask;
 
 
         internal async Task Exit(object transportData = null)
         {
+            //TODO do other internal stuff.. 
             await OnExit(State, transportData);
-            //TODO make overridable onExit Method
+            //TODO do other internal stuff.. 
         }
 
 
         internal async Task Enter(object transportData = null)
         {
+            //TODO do other internal stuff.. 
             await OnEnter(State, transportData);
             //TODO do other internal stuff.. 
         }
@@ -56,7 +56,7 @@ namespace StateMachine.Core
 
     public interface ILatch
     {
+        Func<State, object, Task> OnEnter { get; set; }
         Func<State, object, Task> OnExit { get; set; }
-        Latch.OnEnterDelegate OnEnter { get; set; }
     }
 }
