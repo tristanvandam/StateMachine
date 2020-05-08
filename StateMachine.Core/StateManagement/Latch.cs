@@ -8,11 +8,11 @@ namespace StateMachine.Core.StateManagement
 {
     public class Latch : ILatch
     {
-        private readonly IDictionary<Actions, Func<Latch>> _actions;
+        private readonly IDictionary<Actions, Func<ILatch>> _actions;
 
-        public Latch(State maintainedState, string name = "default", bool doNothingOnReEnter = false)
+        public Latch(State maintainedState, IDictionary<Actions, Func<ILatch>> actionsToLatches, string name = "default", bool doNothingOnReEnter = false)
         {
-            _actions = new Dictionary<Actions, Func<Latch>>();
+            _actions = actionsToLatches;
             State = maintainedState;
             Name = name;
             DoNothingOnReEnter = doNothingOnReEnter;
@@ -23,14 +23,27 @@ namespace StateMachine.Core.StateManagement
         public bool DoNothingOnReEnter { get; }
 
 
-        public void AddActions(IDictionary<Actions, Func<Latch>> actions)
+        public void AddActions(IDictionary<Actions, Func<ILatch>> actions)
         {
             actions.ToList().ForEach(x => _actions[x.Key] = x.Value);   //Override if new function is defined with same key.
         }
+
         internal Latch NextLatchFromAction(Actions actions)
         {
-            //If state not found we will return the current state
-            return !_actions.TryGetValue(actions, out var latchFactory) ? this : latchFactory.Invoke();
+            if (!_actions.TryGetValue(actions, out var latchFactory))
+            {
+                //If state not found we will return the current state
+                return this;
+            } 
+            
+            var newLatch = latchFactory.Invoke();
+            if (!(newLatch is Latch latch))
+            {
+                //Can't do anything, so just return current latch.
+                return this;
+            }
+
+            return latch;
         }
 
 
@@ -40,24 +53,22 @@ namespace StateMachine.Core.StateManagement
 
         internal async Task Exit(object transportData = null)
         {
-            //TODO do other internal stuff.. 
-            await OnExit(State, transportData);
-            //TODO do other internal stuff.. 
+            await State.OnExit(transportData);
         }
 
 
         internal async Task Enter(object transportData = null)
         {
-            //TODO do other internal stuff.. 
-            await OnEnter(State, transportData);
-            //TODO do other internal stuff.. 
-        }
+            await State.OnEnter(transportData);
 
+        }
     }
 
-    public interface ILatch
+
+
+
+    public interface ILatchFactory
     {
-        Func<State, object, Task> OnEnter { get; set; }
-        Func<State, object, Task> OnExit { get; set; }
+        Latch Resolve(string name);
     }
 }

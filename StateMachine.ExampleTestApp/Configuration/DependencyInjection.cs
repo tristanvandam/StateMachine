@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Autofac;
@@ -22,39 +23,61 @@ namespace StateMachine.ExampleTestApp.Configuration
             containerBuilder ??= new ContainerBuilder();
             var cancellationTokenSource = new CancellationTokenSource();
 
+            var nameHome = "home";
+            var nameBed = "bed";
+            var nameWork = "work";
+            var someOtherState = new Binary2BitState(Guid.NewGuid(), 0, 0);
 
-            var homeLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Home - location");
 
-            var workLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Work - location");
-            workLatch.OnExit = async (state, o) =>
-            {
-                //Eg. Make api call etc... 
-                Console.WriteLine("Think about going to gym on the way home...");
-            };
+            containerBuilder.RegisterNamedLatch(BinaryState.One, nameWork, new Dictionary<Actions, string>() { [TransportActions.TakeTrain] = nameHome } );
+            containerBuilder.RegisterNamedLatch(BinaryState.Zero,"home",new Dictionary<Actions, string>() { [TransportActions.TakeTrain] = nameWork, [TransportActions.FallAsleep] = nameBed } );
+            containerBuilder.RegisterNamedLatch(someOtherState, nameBed,new Dictionary<Actions, string>() { [TransportActions.WakeUp] = nameHome } );
 
-            var bedLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Bed - location");
-            bedLatch.OnEnter = async (state, o) =>
-            {
-                //Eg. Make api call etc... 
-                Console.WriteLine("Alarm set for 8am");
-            };
 
-            //TODO - Setup Action Factory
-            workLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.TakeTrain] = () => homeLatch
-            });
 
-            homeLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.TakeTrain] = () => workLatch,
-                [TransportActions.FallAsleep] = () => bedLatch
-            });
+            //containerBuilder.Register((cc) =>
+            //{
+            //    var dictionary = new Dictionary<Actions, Func<ILatch>>()
+            //    {
+            //        [TransportActions.TakeTrain] = () => cc.ResolveKeyed<ILatch>("home")
+            //    };
 
-            bedLatch.AddActions(new Dictionary<Actions, Func<Latch>>()
-            {
-                [TransportActions.WakeUp] = () => homeLatch
-            });
+            //    var workLatch = new Latch(BinaryState.One, dictionary, "Home - location");
+            //    return workLatch;
+            //}).Keyed<ILatch>("work");
+
+            //var homeLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Home - location");
+
+
+
+            //var workLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Work - location");
+   
+
+            //var bedLatch = new Latch(new Binary2BitState(Guid.NewGuid(), 0, 0), "Bed - location");
+            //bedLatch.OnEnter = async (state, o) =>
+            //{
+            //    //Eg. Make api call etc... 
+            //    Console.WriteLine("Alarm set for 8am");
+            //};
+
+            ////TODO - Setup Action Factory
+            //workLatch.AddActions(new Dictionary<Actions, Func<string, Latch>>()
+            //{
+            //    [TransportActions.TakeTrain] = (s) => homeLatch
+            //});
+
+
+
+            //homeLatch.AddActions(new Dictionary<Actions, Func<string, Latch>>()
+            //{
+            //    [TransportActions.TakeTrain] = (s) => workLatch,
+            //    [TransportActions.FallAsleep] = (s) => bedLatch
+            //});
+
+            //bedLatch.AddActions(new Dictionary<Actions, Func<string, Latch>>()
+            //{
+            //    [TransportActions.WakeUp] = (s) => homeLatch
+            //});
 
 
             containerBuilder.RegisterType<ConsoleLogger>().As<ILogger>();
@@ -62,7 +85,8 @@ namespace StateMachine.ExampleTestApp.Configuration
             containerBuilder.Register<FiniteStateMachine>(context =>
             {
                 var logger = context.Resolve<ILogger>();
-                return new FiniteStateMachine(homeLatch, logger.Log);
+                var initialLatch = context.ResolveKeyed<ILatch>(nameHome) as Latch;
+                return new FiniteStateMachine(initialLatch, logger.Log);
             }).As<IFiniteStateMachine>();
 
             containerBuilder.Register<Program>(context =>
@@ -76,5 +100,19 @@ namespace StateMachine.ExampleTestApp.Configuration
             return containerBuilder.Build();
         }
 
+        private static void RegisterNamedLatch(this ContainerBuilder builder, State state, string name, IEnumerable<KeyValuePair<Actions, string>> latchActions, bool doNothingOnReEnter = false)
+        {
+            builder.Register((cc) =>
+            {
+                var dictionary = new Dictionary<Actions, Func<ILatch>>();
+                foreach (var (action, latchToResolveName) in latchActions)
+                {
+                    dictionary.Add(action, () => cc.ResolveKeyed<ILatch>(latchToResolveName));
+                }
+
+                var newLatch = new Latch(state, dictionary, name, doNothingOnReEnter);
+                return newLatch;
+            }).Keyed<ILatch>(name);
+        }
     }
 }

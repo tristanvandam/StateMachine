@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace StateMachine.Core.StateManagement.States
 {
@@ -15,5 +16,14 @@ namespace StateMachine.Core.StateManagement.States
         // Perfect example of Enumeration class pattern:
         public static BinaryState Zero = new BinaryState(Guid.Parse("f54ac134-7f2d-4312-bb57-632dc3a9d8b8"), 0);
         public static BinaryState One = new BinaryState(Guid.Parse("33c4e63c-ca49-4547-b796-a03a37d2db09"), 1);
+        public override Task<object> OnEnter(object transportData)
+        {
+            return Task.FromResult(transportData);
+        }
+
+        public override Task<object> OnExit(object transportData)
+        {
+            return Task.FromResult(transportData);
+        }
     }
 }

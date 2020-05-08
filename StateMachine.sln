@@ -5,7 +5,13 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateMachine.ExampleTestApp", "StateMachine.ExampleTestApp\StateMachine.ExampleTestApp.csproj", "{410B8413-1371-4661-8676-86DF76DF1301}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateMachine.Core", "StateMachine.Core\StateMachine.Core.csproj", "{ACA18ABC-FFE2-4369-A3CB-119B08D5312C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StateMachine.Core", "StateMachine.Core\StateMachine.Core.csproj", "{ACA18ABC-FFE2-4369-A3CB-119B08D5312C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A96CA432-F920-4F46-A0B5-91057B1585A4}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

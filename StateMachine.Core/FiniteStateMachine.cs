@@ -4,14 +4,13 @@ using StateMachine.Core.StateManagement;
 
 namespace StateMachine.Core
 {
-    public class FiniteStateMachine : IFiniteStateMachine
+    public sealed class FiniteStateMachine : IFiniteStateMachine
     {
         private Latch _currentLatch;
         private readonly Action<string> _internalLog;
 
         public FiniteStateMachine(Latch initialStateLatch, Action<string> internalLog = null)
         {
-
             _currentLatch = initialStateLatch;
             _internalLog = internalLog ?? delegate(string s) {  };
         }

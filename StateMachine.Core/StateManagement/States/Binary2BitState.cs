@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace StateMachine.Core.StateManagement.States
 {
@@ -12,6 +13,14 @@ namespace StateMachine.Core.StateManagement.States
 
         public int Bit1 { get; }
         public int Bit2 { get; }
+        public override Task<object> OnEnter(object transportData)
+        {
+            return Task.FromResult(transportData);
+        }
 
+        public override Task<object> OnExit(object transportData)
+        {
+            return Task.FromResult(transportData);
+        }
     }
 }
