@@ -45,7 +45,7 @@ namespace StateMachine.ExampleTestApp
 
             //TODO - Drive State Machine
 
-            var stateMachine = new FiniteStateMachine(homeLatch);
+            var stateMachine = new FiniteStateMachine(homeLatch,Console.WriteLine);
             var cancellationTokenSource = new CancellationTokenSource();
 
             //Run program
